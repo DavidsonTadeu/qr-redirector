@@ -1,9 +1,13 @@
 const links = require('../links.json');
 
 module.exports = (req, res) => {
-  // Captura o ID da URL removendo barras e espaços (ex: /001 -> 001)
-  const rawId = req.url.split('?')[0].replace('/', '').trim();
-  
+  // Na Vercel, o rewrite passa o segmento capturado via query param "id".
+  // Fallback: parseia req.url manualmente (útil em desenvolvimento local).
+  const queryId = req.query && req.query.id != null ? req.query.id : null;
+  const rawId = queryId !== null
+    ? queryId.replace(/^\/+|\/+$/g, '').trim()         // vem de req.query.id
+    : req.url.split('?')[0].replace(/^\/+|\/+$/g, '').trim(); // fallback manual
+
   // Normaliza IDs numéricos curtos (ex: se o usuário acessar /1, converte para 001)
   const id = rawId.padStart(3, '0');
 
@@ -40,4 +44,4 @@ module.exports = (req, res) => {
     </body>
     </html>
   `);
-};
+};
